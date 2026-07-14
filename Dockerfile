@@ -27,3 +27,7 @@ RUN pip install --no-cache-dir --upgrade pip && \
 
 # Copy the application source code
 COPY . .
+
+EXPOSE 8080
+
+CMD ["sh", "-c", "streamlit run streamlit_app.py --server.port=$PORT --server.address=0.0.0.0"]
