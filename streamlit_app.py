@@ -26,7 +26,7 @@ st.sidebar.header("🔧 Configuration & Fine-Tuning")
 mode = st.sidebar.radio("Select Application Mode", ["Interactive App", "Model Fine-Tuner"])
 
 if mode == "Interactive App":
-    st.subheader("📸 Step 1: Upload Raw Room Photo")
+    st.subheader("📸 Upload Raw Room Photo")
     uploaded_file = st.file_uploader("Upload JPG/PNG image of an empty or cluttered room...", type=["jpg", "jpeg", "png"])
     
     if uploaded_file is not None:
@@ -45,7 +45,7 @@ if mode == "Interactive App":
                 st.image(enhanced_image, caption="OpenCV Enchanced & Perspective Map", use_column_width=True)
         
         st.markdown("---")
-        st.subheader("🤖 Step 2: Auto-Generated Room Tags & Features")
+        st.subheader("🤖 Auto-Generated Room Tags & Features")
         
         with st.spinner("Extracting structural features via Hugging Face Models..."):
             detector = manager.get_inference_pipeline()
