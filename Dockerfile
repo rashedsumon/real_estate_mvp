@@ -1,30 +1,29 @@
-# Use an official, lightweight Python runtime as a parent image
-FROM python
+# Use an official lightweight Python image
+FROM python:3.12-slim
 
-# Set system environment variables to optimize Python execution inside Docker
+# Set environment variables
 ENV PYTHONDONTWRITEBYTECODE=1 \
     PYTHONUNBUFFERED=1 \
     STREAMLIT_SERVER_PORT=8501 \
     STREAMLIT_SERVER_HEADLESS=true \
     STREAMLIT_SERVER_ENABLE_CORS=false
 
-# Set the working directory inside the container
+# Set the working directory
 WORKDIR /app
 
-# Install system dependencies required for OpenCV and system stability
+# Install required system packages
 RUN apt-get update && apt-get install -y --no-install-recommends \
     build-essential \
-    libgl1-mesa-glx \
+    libgl1 \
     libglib2.0-0 \
     && rm -rf /var/lib/apt/lists/*
 
-# Copy only requirements.txt first to take advantage of Docker layer caching
+# Copy dependency file first for better Docker layer caching
 COPY requirements.txt .
 
-# Install Python dependencies
+# Upgrade pip and install Python dependencies
 RUN pip install --no-cache-dir --upgrade pip && \
     pip install --no-cache-dir -r requirements.txt
 
-# Copy the rest of your application code into the container
+# Copy the application source code
 COPY . .
-
