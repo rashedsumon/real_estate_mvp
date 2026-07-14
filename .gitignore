@@ -1,0 +1,17 @@
+# Python bytecode
+__pycache__/
+*.py[cod]
+*$py.class
+
+# Local environments
+.venv/
+env/
+venv/
+
+# Deep Learning weights & datasets cached locally
+.cache/
+hf_cache/
+downloads/
+fine_tuned_model/
+*.pt
+*.bin
