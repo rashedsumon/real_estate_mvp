@@ -14,10 +14,16 @@ class RealEstateModelManager:
         self.model_name = "facebook/detr-resnet-50"
         self.device = "cuda" if torch.cuda.is_available() else "cpu"
         
-    def get_inference_pipeline(self):
-        """Loads zero-shot object detection pipeline."""
-        return pipeline("object-detection", model=self.model_name, device=self.device)
 
+    def get_inference_pipeline(self):
+    """Loads zero-shot object detection pipeline only when requested by the user."""
+    from transformers import pipeline # Keep this import inside the method
+    return pipeline(
+        "object-detection", 
+        model=self.model_name, 
+        device=self.device, 
+        model_kwargs={"revision": "no_timm"} # Avoids timm dependency issues
+        )
     def process_with_opencv(self, pil_image):
         """
         Applies OpenCV image processing to automatically adjust exposure,
