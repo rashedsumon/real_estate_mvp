@@ -6,7 +6,7 @@ import torch
 import cv2
 import numpy as np
 from PIL import Image
-from transformers import AutoImageProcessor, AutoModelForObjectDetection, pipeline
+from transformers import AutoImageProcessor, AutoModelForObjectDetection
 
 class RealEstateModelManager:
     def __init__(self):
@@ -14,16 +14,19 @@ class RealEstateModelManager:
         self.model_name = "facebook/detr-resnet-50"
         self.device = "cuda" if torch.cuda.is_available() else "cpu"
         
-
     def get_inference_pipeline(self):
-    """Loads zero-shot object detection pipeline only when requested by the user."""
-    from transformers import pipeline # Keep this import inside the method
-    return pipeline(
-        "object-detection", 
-        model=self.model_name, 
-        device=self.device, 
-        model_kwargs={"revision": "no_timm"} # Avoids timm dependency issues
+        """
+        Loads zero-shot object detection pipeline only when requested by the user.
+        Lazy loading prevents Cloud Run from timing out during deployment setup.
+        """
+        from transformers import pipeline
+        return pipeline(
+            "object-detection", 
+            model=self.model_name, 
+            device=self.device,
+            model_kwargs={"revision": "no_timm"}
         )
+
     def process_with_opencv(self, pil_image):
         """
         Applies OpenCV image processing to automatically adjust exposure,
@@ -33,7 +36,7 @@ class RealEstateModelManager:
         open_cv_image = np.array(pil_image)
         open_cv_image = cv2.cvtColor(open_cv_image, cv2.COLOR_RGB2BGR)
 
-        # 1. Automatic brightness and contrast correction using CLAHE (Contrast Limited Adaptive Histogram Equalization)
+        # 1. Automatic brightness and contrast correction using CLAHE
         lab = cv2.cvtColor(open_cv_image, cv2.COLOR_BGR2LAB)
         l_channel, a, b = cv2.split(lab)
         clahe = cv2.createCLAHE(clipLimit=2.0, tileGridSize=(8, 8))
@@ -48,7 +51,6 @@ class RealEstateModelManager:
 
         # 3. Create a semi-transparent blue "stageable area" overlay based on spatial edges
         mask = np.zeros_like(enhanced_bgr)
-        # Assuming the lower 40% of the image represents the primary floor area
         h, w, _ = enhanced_bgr.shape
         floor_start_y = int(h * 0.6)
         cv2.rectangle(mask, (0, floor_start_y), (w, h), (255, 100, 0), -1)
@@ -63,8 +65,7 @@ class RealEstateModelManager:
     def run_fine_tuning_simulation(self, dataset, epochs=1):
         """
         Simulates fine-tuning on Hugging Face dataset.
-        Due to Streamlit Cloud's resource limits, we trace 1 mock backward pass 
-        to show how weights are calculated and saved dynamically.
+        Traces 1 backward pass to demonstrate weight optimization safely on minimal compute resources.
         """
         processor = AutoImageProcessor.from_pretrained(self.model_name)
         model = AutoModelForObjectDetection.from_pretrained(self.model_name)
